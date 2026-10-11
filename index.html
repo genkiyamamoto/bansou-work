@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>伴走サポート設計ワーク</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* Layout: 1カラムの縦長ワーク。上に固定の4ステップ目次、各シートは「質問→記入→見本」の順。最後に指示文。 */
+:root{
+  --bg:#F8F5FB; --surface:#FFFFFF; --soft:#F1ECF7; --line:#E3DBEE;
+  --ink:#2F2840; --muted:#6E6878; --accent:#6B5A9A; --deep:#44385F; --gold:#A8843E; --goldsoft:#F6EEDD;
+  --ok:#3E7D5A;
+  --display:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Noto Sans JP",sans-serif;
+  --body:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1A1622; --surface:#241F2F; --soft:#2C2539; --line:#3B3349;
+  --ink:#EEE8F6; --muted:#ABA2BA; --accent:#B9A8EA; --deep:#D9CFF3; --gold:#D8B56C; --goldsoft:#3A3122; --ok:#7CC39A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1A1622; --surface:#241F2F; --soft:#2C2539; --line:#3B3349;
+  --ink:#EEE8F6; --muted:#ABA2BA; --accent:#B9A8EA; --deep:#D9CFF3; --gold:#D8B56C; --goldsoft:#3A3122; --ok:#7CC39A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.9;margin:0}
+.wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+h1,h2,h3{font-family:var(--display);color:var(--deep);text-wrap:balance;line-height:1.5;margin:0}
+p{margin:0}
+.hero{padding-block:40px 24px;display:grid;gap:14px}
+.eyebrow{font-size:13px;letter-spacing:.12em;color:var(--gold);font-weight:500}
+.hero h1{font-size:clamp(26px,6vw,34px)}
+.hero p{color:var(--muted)}
+.note{background:var(--goldsoft);border-radius:10px;padding:12px 16px;font-size:14px;color:var(--ink)}
+nav.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-16px;padding:8px 16px;display:flex;gap:6px;overflow-x:auto}
+nav.steps button{flex:1 0 auto;font:500 14px var(--body);color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer;white-space:nowrap}
+nav.steps button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+section.sheet{padding-block:36px 8px;display:grid;gap:22px;scroll-margin-top:64px}
+.sheet-head{display:grid;gap:8px}
+.sheet-head .num{font:700 13px var(--body);letter-spacing:.14em;color:var(--gold)}
+.sheet-head h2{font-size:clamp(22px,5vw,27px)}
+.sheet-head p{color:var(--muted)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 18px;display:grid;gap:16px}
+.step h3{font-size:18px}
+.step .lead{color:var(--muted);font-size:15px}
+.q{display:grid;gap:6px}
+.q label,.q .lbl{font-weight:700;font-size:15px}
+.q .hint{font-size:13px;color:var(--muted)}
+input[type=text],input[type=number],textarea{width:100%;font:16px/1.7 var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:88px;resize:vertical}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::placeholder{color:var(--muted);opacity:.7}
+.trio{display:grid;gap:8px}
+.trio .row{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:center}
+.trio .row span{font:700 15px var(--display);color:var(--accent);text-align:center}
+.ba{display:grid;gap:10px}
+.ba .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
+.ba .colhead{font-size:13px;font-weight:700;letter-spacing:.06em}
+.ba .colhead.b{color:var(--muted)}.ba .colhead.a{color:var(--gold)}
+@media (max-width:520px){.ba .pair{grid-template-columns:1fr}.ba .pair textarea:first-child{border-bottom-left-radius:2px;border-bottom-right-radius:2px}.ba .colhead.a{display:none}.ba .pair textarea+textarea{border-top-left-radius:2px;border-top-right-radius:2px;border-color:var(--gold)}}
+.ba textarea{min-height:64px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{font:500 14px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--soft);border-color:var(--accent);color:var(--deep);font-weight:700}
+.warn{border-left:4px solid var(--gold);background:var(--goldsoft);border-radius:4px 12px 12px 4px;padding:16px 18px;display:grid;gap:10px}
+.warn h3{color:var(--ink)}
+.warn .motto{font:700 17px var(--display);color:var(--deep)}
+/* ビフォーアフター表の見本（入力に合わせて動く） */
+.preview{border:1px solid var(--line);border-radius:12px;background:var(--soft);padding:14px;display:grid;gap:10px}
+.preview .ttl{font:700 16px var(--display);text-align:center;color:var(--deep)}
+.preview .band{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:4px;font-size:12px;font-weight:700;text-align:center}
+.preview .band span{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 4px;min-width:0;overflow-wrap:anywhere}
+.preview .band span:nth-child(2){color:var(--accent)}.preview .band span:nth-child(3){color:var(--gold)}
+.preview .cols{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.preview ul{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:13px;line-height:1.5}
+.preview li{background:var(--surface);border-radius:6px;padding:6px 8px;min-width:0;overflow-wrap:anywhere}
+.preview .arrow{font:700 12px var(--body);color:var(--surface);background:var(--accent);border-radius:8px;padding:8px 6px;text-align:center;line-height:1.5;writing-mode:horizontal-tb;max-width:84px}
+.preview .cap{font-size:12px;color:var(--muted);text-align:center}
+.groups{display:grid;gap:10px}
+.group{display:grid;grid-template-columns:1fr;gap:6px;border:1px dashed var(--line);border-radius:10px;padding:12px}
+.group .gh{font:700 14px var(--display);color:var(--accent)}
+.copybox{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;white-space:pre-wrap;font-size:14px;line-height:1.8;max-height:320px;overflow:auto}
+.btns{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:700 15px var(--body);border-radius:10px;padding:10px 18px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--surface)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.quiet{background:transparent;color:var(--muted);border-color:var(--line);font-weight:500}
+.done{font-size:13px;color:var(--ok);font-weight:700}
+.howto{display:grid;gap:6px;font-size:15px;padding-left:1.4em;margin:0}
+footer{padding-block:40px 8px;color:var(--muted);font-size:13px;text-align:center;display:grid;gap:4px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="eyebrow">LINE公式ご登録特典　第2章プレゼント</p>
+    <h1>伴走サポート 3つの設計ワーク</h1>
+    <p>第2章でお話しした「ビフォーアフター表」「キモ図」「お客様の声」を、あなたの伴走サポートで形にするためのワークです。質問に答えていくと、最後にチャッピー（ChatGPT）などのAIに貼るだけの指示文ができあがります。</p>
+    <p class="note">入力した内容は、お使いのスマホ・パソコンの中にだけ自動で保存されます。全部を一度に埋めなくて大丈夫。書けるところから進めてください。</p>
+    <div class="btns">
+      <button class="btn ghost" id="fillExample" type="button">Bさんの記入例を入れてみる</button>
+      <button class="btn quiet" id="clearAll" type="button">入力をすべて消す</button>
+      <span class="done" id="clearMsg" hidden></span>
+    </div>
+  </header>
+
+  <nav class="steps" aria-label="ワークの目次">
+    <button type="button" data-go="s1" class="on">1 ビフォーアフター表</button>
+    <button type="button" data-go="s2">2 キモ図</button>
+    <button type="button" data-go="s3">3 お客様の声</button>
+    <button type="button" data-go="s4">4 AIへの指示文</button>
+  </nav>
+
+  <!-- シート1 -->
+  <section class="sheet" id="s1">
+    <div class="sheet-head">
+      <span class="num">SHEET 1</span>
+      <h2>ビフォーアフター表</h2>
+      <p>伴走サポートを受ける前と後で、お客様がどう変わっているのかを並べた表です。コツは<b>変化は具体的に、中身は抽象的に</b>。間に何をするかより、お客様がどう変わるかを書きます。</p>
+    </div>
+
+    <div class="step">
+      <h3>STEP1　あなた自身の変化を振り返る</h3>
+      <p class="lead">ビフォーアフターの素材は、あなた自身の変化の中にあります。横軸を年齢、縦軸を「心の成長・変化の大きさ」にした曲線を思い浮かべてみてください。</p>
+      <div class="q">
+        <span class="lbl">大きく変わった転機を、1〜3つ</span>
+        <div class="trio">
+          <div class="row"><span>①</span><input type="text" id="tp1" placeholder="例）会社員時代、管理職からヒラに降格した時期"></div>
+          <div class="row"><span>②</span><input type="text" id="tp2" placeholder="例）脱サラ1年目"></div>
+          <div class="row"><span>③</span><input type="text" id="tp3" placeholder="例）コロナ禍"></div>
+        </div>
+      </div>
+      <div class="q">
+        <span class="lbl">その転機で、何をしたから・何を学んだから変われましたか？</span>
+        <div class="trio">
+          <div class="row"><span>①</span><input type="text" id="do1" placeholder="例）自己啓発に通い、考え方を整えた"></div>
+          <div class="row"><span>②</span><input type="text" id="do2" placeholder="例）押し付けにならないセールスを学んだ"></div>
+          <div class="row"><span>③</span><input type="text" id="do3" placeholder="例）WEBからお客様に届く流れをつくった"></div>
+        </div>
+      </div>
+      <div class="q">
+        <span class="lbl">転機の前と後で、何が変わりましたか？（数字・気持ち・考え方）</span>
+        <div class="trio">
+          <div class="row"><span>①</span><input type="text" id="ch1" placeholder="例）無気力だった会社員が、1年で役職に復帰"></div>
+          <div class="row"><span>②</span><input type="text" id="ch2" placeholder="例）ゼロからの脱サラ1年目で、ご成約500万円"></div>
+          <div class="row"><span>③</span><input type="text" id="ch3" placeholder="例）パソコン1台で在宅ワーク5年目に"></div>
+        </div>
+        <span class="hint">例はげんげんの場合です。</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <h3>STEP2　お客様の変化を思い出す</h3>
+      <div class="q">
+        <label for="cust">これまでのお客様は、どんなことで困っていましたか？</label>
+        <span class="hint">ご成約の経験がまだない方は、どんな人から、どんなテーマで相談されたり頼られたりしたかを書いてください。</span>
+        <textarea id="cust" placeholder="例）鑑定で自分の特性は分かったけれど、毎日の過ごし方は何も変わらないという方が多い"></textarea>
+      </div>
+      <div class="q">
+        <label for="overlap">過去のあなたと、今のお客様の悩みで重なるところは？</label>
+        <span class="hint">過去の自分に近い悩みを持つ方は、あなたのサポートを受けたいと感じやすい方です。</span>
+        <textarea id="overlap" placeholder="例）私も昔は人に合わせてばかりで、いつも疲れていた"></textarea>
+      </div>
+      <div class="q">
+        <label for="strength">自分では当たり前でも、人から「すごいね」「助かった」と言われることは？</label>
+        <textarea id="strength" placeholder="例）話を聞いてもらうだけで、気持ちが軽くなると言われる"></textarea>
+      </div>
+    </div>
+
+    <div class="step">
+      <h3>STEP3　ビフォーアフター表に書き込む</h3>
+      <div class="q">
+        <label for="period">伴走サポートの期間</label>
+        <div class="row" style="display:flex;gap:8px;align-items:center"><input type="number" id="period" min="1" max="24" inputmode="numeric" placeholder="3" style="max-width:96px"><span>ヶ月</span></div>
+      </div>
+      <div class="q">
+        <span class="lbl">ビフォー → アフターを3つ</span>
+        <span class="hint">ビフォーはお客様が実際に口にしそうな言葉で。アフターはお客様が「こうなりたい」と思える姿で。</span>
+        <div class="ba">
+          <div class="pair"><span class="colhead b">ビフォー（受ける前）</span><span class="colhead a">アフター（受けた後）</span></div>
+          <div class="pair"><textarea id="b1" placeholder="例）鑑定で特性は分かったけど、毎日は何も変わらない"></textarea><textarea id="a1" placeholder="例）自分の特性を活かした選択を、自分で決められる"></textarea></div>
+          <div class="pair"><textarea id="b2" placeholder="例）人に合わせてばかりで、いつも疲れている"></textarea><textarea id="a2" placeholder="例）断る・頼むが自然にできて、心に余白がある"></textarea></div>
+          <div class="pair"><textarea id="b3" placeholder="例）やりたいことが分からず、将来が不安"></textarea><textarea id="a3" placeholder="例）やりたいことに向けて、最初の一歩を踏み出している"></textarea></div>
+        </div>
+      </div>
+      <div class="q">
+        <label for="method">あなたの伴走サポート（メソッド）の名前</label>
+        <span class="hint">まだ決まっていなければ空欄でOK。AIと一緒に考えられます。</span>
+        <input type="text" id="method" placeholder="例）特性を活かす3ヶ月伴走サポート">
+      </div>
+      <div class="q">
+        <span class="lbl">メソッドを表すキーワードを3つ</span>
+        <span class="hint">中身は抽象的に。矢印の中に入る言葉です。</span>
+        <div class="trio">
+          <div class="row"><span>①</span><input type="text" id="kw1" placeholder="例）特性を知る"></div>
+          <div class="row"><span>②</span><input type="text" id="kw2" placeholder="例）選ぶ練習"></div>
+          <div class="row"><span>③</span><input type="text" id="kw3" placeholder="例）自分で決める力"></div>
+        </div>
+      </div>
+      <div class="q">
+        <span class="lbl">資料の雰囲気（トンマナ）</span>
+        <div class="chips" data-chip="tone">
+          <button type="button" aria-pressed="false" data-v="やわらかいパステルカラーで、花やリボンをあしらった上品でかわいい雰囲気">やわらかパステル</button>
+          <button type="button" aria-pressed="false" data-v="くすんだラベンダーとゴールドで、月や星の線画が入った落ち着いた雰囲気">くすみ紫×ゴールド</button>
+          <button type="button" aria-pressed="false" data-v="深い紺とゴールドで、力強く高級感のある雰囲気">紺×ゴールド</button>
+          <button type="button" aria-pressed="false" data-v="やさしいグリーンと木漏れ日で、ナチュラルで癒やされる雰囲気">ナチュラルグリーン</button>
+        </div>
+        <input type="text" id="toneFree" placeholder="好きな色や雰囲気があれば自由に（例：神秘的、白と金）">
+      </div>
+      <div class="q">
+        <span class="lbl">見本（入力に合わせて変わります）</span>
+        <div class="preview" aria-live="polite">
+          <p class="ttl" id="pvTitle"></p>
+          <div class="band"><span>before</span><span id="pvMethod"></span><span>after</span></div>
+          <div class="cols">
+            <ul id="pvB"></ul>
+            <div class="arrow" id="pvKw"></div>
+            <ul id="pvA"></ul>
+          </div>
+          <p class="cap">AIで画像にすると、この並びで横長の表ができます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- シート2 -->
+  <section class="sheet" id="s2">
+    <div class="sheet-head">
+      <span class="num">SHEET 2</span>
+      <h2>キモ図</h2>
+      <p>あなたのサポートの「肝」になる変化の道のりを、1枚の図にしたものです。ビフォーアフター表が「どこへ行けるのか」なら、キモ図は「どうやってそこへ行くのか」をひと目で伝えます。</p>
+    </div>
+
+    <div class="warn">
+      <h3>最初に知っておいてほしいこと：価値観の迷宮入り</h3>
+      <p>価値観の言語化は、求道者が一生のテーマにするような領域です。掘ろうと思えばどこまでも深掘りできますし、目に見えないものを大切にしている方ほど、ここで立ち止まりがちです。</p>
+      <p>でも、実際にお相手に響くかどうかは、1人でどれだけ考えても<b>やってみないと分からない</b>もの。良いキモ図とは、提案の場でスラスラと自分の言葉で話せる図のことです。いきなり完璧を目指さず、まずは完成させて提案の場に立ち、トライアンドエラーで磨いていきましょう。</p>
+      <p>手が止まりそうになったら、この言葉を思い出してください。</p>
+      <p class="motto">「発信をしなければ、世の中的にはやっていないのと同じ」</p>
+    </div>
+
+    <div class="step">
+      <h3>想いを言葉にする</h3>
+      <p class="lead">1問1〜2行でOK。書けない問いは飛ばして、手順1に進んで大丈夫です。</p>
+      <div class="q"><label for="omoi1">どんな想いを、サポートの中に込めて届けたいですか？</label><textarea id="omoi1" placeholder="例）鑑定で終わらせず、本来の自分で生きる人を増やしたい"></textarea></div>
+      <div class="q"><label for="omoi2">あなたが大切にしている言葉、サポートの中で伝えたい言葉は？</label><textarea id="omoi2" placeholder="例）あなたは、あなたのままで大丈夫"></textarea></div>
+      <div class="q"><label for="omoi3">どんな人の支えになって、どんな世の中にしていきたいですか？</label><textarea id="omoi3" placeholder="例）人に合わせて疲れている人が、自分の特性を活かして笑顔で暮らせる世の中"></textarea></div>
+    </div>
+
+    <div class="step">
+      <h3>キモ図をつくる5つの手順</h3>
+      <div class="q">
+        <label for="theme">手順1　主題を決める</label>
+        <span class="hint">サポートのタイトルや、ビフォーアフターの変化が起きる理由を主題にするのが理想です。</span>
+        <input type="text" id="theme" placeholder="例）鑑定で分かった特性を、毎日の選択に活かせる自分になる">
+      </div>
+      <div class="q">
+        <label for="elems">手順2　必要な考え方を書き出す</label>
+        <span class="hint">主題を叶えるために必要な「考え方」や「前提」を、1行に1つずつ。</span>
+        <textarea id="elems" style="min-height:150px" placeholder="例）&#10;本来の特性を知る&#10;本当の願いを言葉にする&#10;人に合わせすぎるクセに気づく&#10;断る・頼むを小さく試す&#10;毎日の選択を自分で決める&#10;意識しなくても自然と選べる"></textarea>
+      </div>
+      <div class="q">
+        <span class="lbl">手順3・4　近いものをグループにして、名前をつける</span>
+        <span class="hint">グループは2〜4つが目安。使わない欄は空欄のままで大丈夫です。</span>
+        <div class="groups">
+          <div class="group"><span class="gh">グループ1</span><input type="text" id="n1" placeholder="名前　例）気づき"><input type="text" id="g1" placeholder="中身　例）本来の特性を知る・本当の願いを言葉にする・人に合わせすぎるクセに気づく"></div>
+          <div class="group"><span class="gh">グループ2</span><input type="text" id="n2" placeholder="名前　例）定着"><input type="text" id="g2" placeholder="中身　例）断る・頼むを小さく試す・毎日の選択を自分で決める"></div>
+          <div class="group"><span class="gh">グループ3</span><input type="text" id="n3" placeholder="名前　例）変容"><input type="text" id="g3" placeholder="中身　例）意識しなくても自然と選べる"></div>
+          <div class="group"><span class="gh">グループ4（あれば）</span><input type="text" id="n4" placeholder="名前"><input type="text" id="g4" placeholder="中身"></div>
+        </div>
+      </div>
+      <div class="q">
+        <span class="lbl">手順5　しっくりくる形を選ぶ</span>
+        <span class="hint">同じ中身でも、形によって伝わり方が変わります。迷ったら「AIにおまかせ」でOK。</span>
+        <div class="chips" data-chip="shape">
+          <button type="button" aria-pressed="false" data-v="階段型（順番に1段ずつ上っていく）">階段型</button>
+          <button type="button" aria-pressed="false" data-v="ピラミッド型（土台から積み上げていく）">ピラミッド型</button>
+          <button type="button" aria-pressed="false" data-v="循環型（要素がめぐって育っていく）">循環型</button>
+          <button type="button" aria-pressed="false" data-v="流れ型（左から右へ順に進む）">流れ型</button>
+          <button type="button" aria-pressed="false" data-v="重なる円型（要素が重なるところが中心）">重なる円型</button>
+          <button type="button" aria-pressed="false" data-v="AIにおまかせ（内容に合う形を選択肢で提案してほしい）">AIにおまかせ</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- シート3 -->
+  <section class="sheet" id="s3">
+    <div class="sheet-head">
+      <span class="num">SHEET 3</span>
+      <h2>お客様の声を集める</h2>
+      <p>「当たっていましたか？」と聞くと、返ってくるのはその場の声です。でも「セッションの後、何か変化はありましたか？」と聞くと、変化の声が返ってきます。この変化の声が、伴走サポートで起きることの何よりの予告編になります。</p>
+    </div>
+    <div class="step">
+      <h3>LINEでお願いするときの文例</h3>
+      <p class="lead">セッションから少し時間がたって、変化が出てきた頃にお送りするのがおすすめです。お名前を入れると、文例に反映されます。</p>
+      <div class="q"><label for="custName">お客様のお名前</label><input type="text" id="custName" placeholder="例）さくら"></div>
+      <div class="copybox" id="msgVoice"></div>
+      <div class="btns"><button class="btn" type="button" data-copy="msgVoice">文例をコピー</button><span class="done" hidden></span></div>
+      <p class="lead">「ご感想を書いてください」とだけお願いすると、文章を書き慣れていない方は「楽しかったです」で終わってしまいます。最低限、②③④があれば、お困りごとから変化まで伝わる声の形が整います。</p>
+    </div>
+    <div class="step">
+      <h3>掲載のお願い</h3>
+      <p class="lead">お名前やお写真を載せてよいかは、先にきちんと確認しておきましょう。顔写真と本名がある声ほど信頼されますが、ご不安な方には「仮名でも大丈夫ですよ」とお伝えすると、安心して協力していただけます。</p>
+      <div class="copybox" id="msgPermit"></div>
+      <div class="btns"><button class="btn" type="button" data-copy="msgPermit">掲載のお願いをコピー</button><span class="done" hidden></span></div>
+      <p class="lead">いただいた声のうち、②のお困りごとはビフォーに、③の変化はアフターに、そのまま使えます。</p>
+    </div>
+  </section>
+
+  <!-- 指示文 -->
+  <section class="sheet" id="s4">
+    <div class="sheet-head">
+      <span class="num">STEP 4</span>
+      <h2>AIへの指示文</h2>
+      <p>シート1・2で入力した内容が、そのまま入っています。コピーして、チャッピー（ChatGPT）やGeminiなどの画面に貼り付けて送るだけです。</p>
+    </div>
+    <ol class="howto">
+      <li>下のボタンで指示文をコピーする</li>
+      <li>チャッピーなどの新しいチャットに貼り付けて送る</li>
+      <li>AIからの質問に答えながら、案を選んでいく</li>
+      <li>最後に出てくる画像用の指示文で、表や図の画像を作る</li>
+    </ol>
+    <div class="step">
+      <h3>ビフォーアフター表をつくる指示文</h3>
+      <div class="copybox" id="promptBA"></div>
+      <div class="btns"><button class="btn" type="button" data-copy="promptBA">指示文をコピー</button><span class="done" hidden></span></div>
+    </div>
+    <div class="step">
+      <h3>キモ図をつくる指示文</h3>
+      <p class="lead">先にビフォーアフター表を作っておくと、キモ図の精度が上がります。</p>
+      <div class="copybox" id="promptKimo"></div>
+      <div class="btns"><button class="btn" type="button" data-copy="promptKimo">指示文をコピー</button><span class="done" hidden></span></div>
+    </div>
+    <div class="warn">
+      <h3>うまくまとまらなかったら</h3>
+      <p>AIの案がしっくりこない、どれを選べばいいか迷う。そんなときは、入力した内容をそのまま個別相談に持ってきてください。一緒に、あなたの言葉で話せる表と図に仕上げていきます。</p>
+      <div class="btns"><button class="btn ghost" type="button" data-copy="summary">入力内容をまとめてコピー</button><span class="done" hidden></span></div>
+      <div class="copybox" id="summary" hidden></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>げんげん（山本元基）｜合同会社エバマン</p>
+    <p>LINE公式ご登録特典　第2章「伴走サポート 3つの設計」</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const KEY='bansou-sekkei-work-v1';
+  const ids=['tp1','tp2','tp3','do1','do2','do3','ch1','ch2','ch3','cust','overlap','strength','period','b1','a1','b2','a2','b3','a3','method','kw1','kw2','kw3','toneFree','omoi1','omoi2','omoi3','theme','elems','n1','g1','n2','g2','n3','g3','n4','g4','custName'];
+  const chips={tone:'',shape:''};
+  const $=id=>document.getElementById(id);
+  const v=id=>($(id).value||'').trim();
+
+  function save(){try{const d={chips};ids.forEach(i=>d[i]=$(i).value);localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+  function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(!d)return;ids.forEach(i=>{if(typeof d[i]==='string')$(i).value=d[i];});if(d.chips){chips.tone=d.chips.tone||'';chips.shape=d.chips.shape||'';}}catch(e){}}
+
+  function syncChips(){document.querySelectorAll('[data-chip]').forEach(g=>{const k=g.dataset.chip;g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===chips[k])));});}
+  document.querySelectorAll('[data-chip]').forEach(g=>{g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=g.dataset.chip;chips[k]=chips[k]===b.dataset.v?'':b.dataset.v;syncChips();render();save();});});
+
+  const line=(label,val)=>`■ ${label}：${val||'（未記入）'}`;
+  const list=(arr)=>{const f=arr.filter(Boolean);return f.length?f.map((x,i)=>`　${'①②③④'[i]} ${x}`).join('\n'):'　（未記入）';};
+  function period(){const p=v('period');return p?p+'ヶ月':'';}
+  function tone(){return [chips.tone,v('toneFree')].filter(Boolean).join('／');}
+  function baPairs(){const r=[];for(let i=1;i<=3;i++){const b=v('b'+i),a=v('a'+i);if(b||a)r.push(`　${'①②③'[i-1]} ${b||'（未記入）'} → ${a||'（未記入）'}`);}return r.length?r.join('\n'):'　（未記入）';}
+  function groups(){const r=[];for(let i=1;i<=4;i++){const n=v('n'+i),g=v('g'+i);if(n||g)r.push(`　グループ${i}「${n||'名前未定'}」：${g||'（中身未記入）'}`);}return r.length?r.join('\n'):'　（未記入）';}
+  function elems(){const e=v('elems').split(/\n+/).map(s=>s.trim()).filter(Boolean);return e.length?e.map(s=>'　・'+s).join('\n'):'　（未記入）';}
+
+  function baAnswers(){return [
+    line('伴走サポートの期間',period()),
+    '■ 私自身の転機\n'+list([v('tp1'),v('tp2'),v('tp3')]),
+    '■ 転機で何をしたか・何を学んだか\n'+list([v('do1'),v('do2'),v('do3')]),
+    '■ 転機の前と後の変化\n'+list([v('ch1'),v('ch2'),v('ch3')]),
+    line('これまでのお客様のお困りごと',v('cust')),
+    line('過去の私とお客様の悩みの重なり',v('overlap')),
+    line('人から言われる強み',v('strength')),
+    '■ ビフォーアフター表の下書き（ビフォー → アフター）\n'+baPairs(),
+    line('メソッド名',v('method')),
+    line('メソッドを表すキーワード3つ',[v('kw1'),v('kw2'),v('kw3')].filter(Boolean).join('・')),
+    line('資料の雰囲気（トンマナ）',tone())
+  ].join('\n');}
+
+  function kimoAnswers(){return [
+    line('届けたい想い',v('omoi1')),
+    line('大切にしている言葉・伝えたい言葉',v('omoi2')),
+    line('支えたい人・つくりたい世の中',v('omoi3')),
+    line('手順1 主題',v('theme')),
+    '■ 手順2 必要な考え方\n'+elems(),
+    '■ 手順3・4 グループと名前\n'+groups(),
+    line('手順5 図の形の希望',chips.shape),
+    line('資料の雰囲気（トンマナ）',tone())
+  ].join('\n');}
+
+  function promptBA(){return `あなたはビジネス発信のサポーターです。占い師・ヒーラーなどの個人事業主である私が、高単価の伴走サポートを「売り込みではなくご提案」としてお伝えするための、ビフォーアフター表づくりを手伝ってください。
+
+【私の回答】
+${baAnswers()}
+
+【進め方】
+1. 回答をもとに、特におすすめのターゲット案を5つ出してください。
+2. そのターゲットに響くコンセプト案を5つ出してください。
+3. 私に質問をしながら、私の想いと合うターゲットとコンセプトを一緒に決めてください。未記入の項目や、より良い表にするために必要なことがあれば、画像用の指示文を出す前に質問してください（一度の質問は3つまで）。
+4. 決まったら、ビフォーアフター表の画像を作るための指示文を出してください。そのまま画像を作れる場合は、画像も作ってください。
+
+【ビフォーアフター表のルール】
+・ビフォーとアフターはなるべく具体的に、その橋渡しとなるメソッドの部分は抽象的に
+・パワーポイントの資料にも使えるよう、横長（16:9）
+・文字が多いと資料として使えないので、文字サイズ32以上を目安に、必要な要素を簡潔に
+・すべては入れられないので、ターゲットの反応が取れそうなビフォーアフターを3つずつに絞る
+・レイアウト：上に「◯◯で理想の自分が現実に！！！」のようなタイトル／その下に「before → メソッド名 → after」の3つの矢印の帯／左にBEFOREを3項目、右にAFTERを3項目／中央にイメージ画像と太い矢印を置き、矢印の中にメソッドを表すキーワードを3つ
+・雰囲気は【私の回答】のトンマナに合わせる
+・日本語の文字は正確に、誤字がないように`;}
+
+  function promptKimo(){return `あなたはビジネス発信のサポーターです。占い師・ヒーラーなどの個人事業主である私が、伴走サポートの「キモ図」（サポートの肝になる変化の道のりを1枚にした図）を作るのを手伝ってください。
+
+【私の回答】
+${kimoAnswers()}
+
+【ビフォーアフター表の下書き】
+${baPairs()}
+メソッド名：${v('method')||'（未記入）'}
+
+【進め方】
+1. 手順2〜4の内容から、コンセプトを表すコアな要素（1〜4個）の名称案を5つ出してください。
+2. ビフォーアフター表も参考にして、コンセプト案を5つ出してください。
+3. 循環型・階段型・ピラミッド型など、私のコンセプトを表現できるおすすめの図の形を、理由と一緒に選択肢で提案してください。
+4. 私に質問をしながら、私の想いと合うコンセプトを一緒に決めてください。未記入の項目や、より効果が見込める質問があれば、画像用の指示文を出す前に質問してください（一度の質問は3つまで）。
+5. 決まったら、キモ図の画像を作るための指示文を出してください。そのまま画像を作れる場合は、画像も作ってください。
+
+【キモ図のルール】
+・パワーポイントの資料にも使えるよう、横長（16:9）
+・文字が多いと資料として使えないので、文字サイズ32以上を目安に、必要な要素を簡潔に
+・すべては入れられないので、コアな要素がどのように組み合わさっているかが、ひと目で分かるイラストにする
+・上にメソッド名、その下に一言のサブタイトル、中央に図、一番下に図全体を表す一文
+・雰囲気は【私の回答】のトンマナに合わせる
+・日本語の文字は正確に、誤字がないように`;}
+
+  function msgVoice(){const n=v('custName')||'◯◯';return `${n}さん、先日はセッションを受けてくださって、ありがとうございました！
+その後、いかがお過ごしですか？
+
+よろしければ、これからのサポートづくりの参考に、ご感想をお聞かせいただけたら嬉しいです。
+下の5つの質問に、思いつく範囲で答えていただけますか？全部でなくても大丈夫です＾＾
+
+① 何を見て知ってくださいましたか？
+② どんなことでお困りでしたか？
+③ 受けてみていかがでしたか？どんな変化がありましたか？
+④ もし受けていなかったら、どうなっていたと思いますか？
+⑤ どんな方におすすめしたいですか？`;}
+
+  const msgPermit=`いただいたご感想を、ホームページやLINEでご紹介してもよろしいでしょうか？
+当てはまるものを教えてください。
+
+・掲載　→　OK ／ 掲載しないでほしい
+・お名前　→　本名でOK ／ イニシャル・仮名でお願いしたい
+・お写真　→　顔写真OK ／ イメージ写真でお願いしたい ／ 写真なしでお願いしたい
+
+仮名でも大丈夫ですので、ご安心くださいね。`;
+
+  function summary(){return `【伴走サポート 3つの設計ワーク　入力内容】
+
+＜シート1　ビフォーアフター表＞
+${baAnswers()}
+
+＜シート2　キモ図＞
+${kimoAnswers()}`;}
+
+  function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+  function renderPreview(){
+    const m=v('method');
+    $('pvTitle').textContent=m?`${m}で理想の自分が現実に！！！`:'◯◯で理想の自分が現実に！！！';
+    $('pvMethod').textContent=m||'メソッド名';
+    const B=[1,2,3].map(i=>v('b'+i)),A=[1,2,3].map(i=>v('a'+i));
+    $('pvB').innerHTML=B.map((x,i)=>`<li>${esc(x||'ビフォー'+(i+1))}</li>`).join('');
+    $('pvA').innerHTML=A.map((x,i)=>`<li>${esc(x||'アフター'+(i+1))}</li>`).join('');
+    const k=[v('kw1'),v('kw2'),v('kw3')];
+    $('pvKw').innerHTML=k.map((x,i)=>esc(x||'キーワード'+(i+1))).join('<br>');
+  }
+  function render(){
+    $('promptBA').textContent=promptBA();
+    $('promptKimo').textContent=promptKimo();
+    $('msgVoice').textContent=msgVoice();
+    $('msgPermit').textContent=msgPermit;
+    $('summary').textContent=summary();
+    renderPreview();
+  }
+
+  ids.forEach(i=>$(i).addEventListener('input',()=>{render();save();}));
+
+  document.querySelectorAll('[data-copy]').forEach(btn=>{btn.addEventListener('click',()=>{
+    const box=$(btn.dataset.copy);const text=box.textContent;const msg=btn.parentElement.querySelector('.done');
+    const ok=()=>{if(msg){msg.textContent='コピーしました';msg.hidden=false;setTimeout(()=>msg.hidden=true,2500);}};
+    const fallback=()=>{box.hidden=false;const r=document.createRange();r.selectNodeContents(box);const s=getSelection();s.removeAllRanges();s.addRange(r);if(msg){msg.textContent='選択しました。長押しでコピーしてください';msg.hidden=false;}};
+    try{navigator.clipboard.writeText(text).then(ok,fallback);}catch(e){fallback();}
+  });});
+
+  const EX={tp1:'人に合わせてばかりで疲れ切り、初めて自分の鑑定を受けた時期',tp2:'鑑定を学び、単発のセッションを始めた頃',tp3:'「お客様は喜んでくれるのに、その後が続かない」と気づいた時期',do1:'自分の特性を知り、断る・頼むを少しずつ試した',do2:'学びを続けて、単発のセッションでお客様に届けた',do3:'3つの設計で、伴走サポートの伝え方を整えた',ch1:'人間関係の疲れが減って、心に余白ができた',ch2:'「当たってる！」と喜ばれる鑑定ができるようになった',ch3:'30万円の伴走サポートで「これなら受けたい」と言われるように',strength:'話を聞いてもらうだけで、気持ちが軽くなると言われる',period:'3',b1:'鑑定で特性は分かったけど、毎日は何も変わらない',a1:'自分の特性を活かした選択を、自分で決められる',b2:'人に合わせてばかりで、いつも疲れている',a2:'断る・頼むが自然にできて、心に余白がある',b3:'やりたいことが分からず、将来が不安',a3:'やりたいことに向けて、最初の一歩を踏み出している',method:'特性を活かす3ヶ月伴走サポート',kw1:'特性を知る',kw2:'選ぶ練習',kw3:'自分で決める力',cust:'鑑定で自分の特性は分かったけれど、毎日の過ごし方は何も変わらないという方が多い',overlap:'私も昔は人に合わせてばかりで、いつも疲れていた',omoi1:'鑑定で終わらせず、本来の自分で生きる人を増やしたい',omoi2:'あなたは、あなたのままで大丈夫',omoi3:'人に合わせて疲れている人が、自分の特性を活かして笑顔で暮らせる世の中',theme:'鑑定で分かった特性を、毎日の選択に活かせる自分になる',elems:'本来の特性を知る\n本当の願いを言葉にする\n人に合わせすぎるクセに気づく\n断る・頼むを小さく試す\n毎日の選択を自分で決める\n意識しなくても自然と選べる',n1:'気づき',g1:'本来の特性を知る・本当の願いを言葉にする・人に合わせすぎるクセに気づく',n2:'定着',g2:'断る・頼むを小さく試す・毎日の選択を自分で決める',n3:'変容',g3:'意識しなくても自然と選べる'};
+  $('fillExample').addEventListener('click',()=>{Object.entries(EX).forEach(([k,val])=>{$(k).value=val;});chips.tone='くすんだラベンダーとゴールドで、月や星の線画が入った落ち着いた雰囲気';chips.shape='階段型（順番に1段ずつ上っていく）';syncChips();render();save();const m=$('clearMsg');m.textContent='Bさんの記入例を入れました。ご自身の内容に書きかえてください';m.hidden=false;});
+
+  let armed=false;const clr=$('clearAll');
+  clr.addEventListener('click',()=>{if(!armed){armed=true;clr.textContent='もう一度押すと、すべて消えます';setTimeout(()=>{armed=false;clr.textContent='入力をすべて消す';},4000);return;}
+    ids.forEach(i=>$(i).value='');chips.tone='';chips.shape='';syncChips();render();save();armed=false;clr.textContent='入力をすべて消す';const m=$('clearMsg');m.textContent='入力を消しました';m.hidden=false;});
+
+  const navBtns=[...document.querySelectorAll('nav.steps button')];
+  navBtns.forEach(b=>b.addEventListener('click',()=>{$(b.dataset.go).scrollIntoView();}));
+  const secs=['s1','s2','s3','s4'].map($);
+  function setOn(id){navBtns.forEach(b=>b.classList.toggle('on',b.dataset.go===id));}
+  let ticking=false;
+  function spy(){ticking=false;const line=window.innerHeight*0.35;let cur=secs[0].id;
+    secs.forEach(s=>{if(s.getBoundingClientRect().top<=line)cur=s.id;});
+    if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4)cur=secs[secs.length-1].id;
+    setOn(cur);}
+  window.addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(spy);}},{passive:true});
+  window.addEventListener('resize',spy);
+  navBtns.forEach(b=>b.addEventListener('click',()=>setOn(b.dataset.go)));
+  spy();
+
+  load();syncChips();render();
+})();
+</script>
+</body>
+</html>
