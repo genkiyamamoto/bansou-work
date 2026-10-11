@@ -294,9 +294,10 @@ footer{padding-block:40px 8px;color:var(--muted);font-size:13px;text-align:cente
       <p>「当たっていましたか？」と聞くと、返ってくるのはその場の声です。でも「セッションの後、何か変化はありましたか？」と聞くと、変化の声が返ってきます。この変化の声が、伴走サポートで起きることの何よりの予告編になります。</p>
     </div>
     <div class="warn">
-      <h3>声は「文面」ではなく「対面」でいただく</h3>
-      <p>お客様の声は、こちらからお願いするものです。LINEで長い質問を送ってしまうと、非常識なお願いに映ってしまい、せっかくの信頼関係（ラポール）が切れてしまうこともあります。</p>
-      <p>おすすめはZOOM、できればコーヒーをごちそうしながら直接お会いする<b>対面インタビュー</b>。5つの質問を会話の中で直接うかがい、後日書き起こしたものを確認していただきます。ZOOMなら録画機能で、喫茶店なら了承をいただいてスマホの録音機能で記録を残せるので、書き起こしもラクになります。</p>
+      <h3>誠意が伝わる「対面」で、良いお声が集まる</h3>
+      <p>お客様の声は、こちらからお願いするものです。いきなりLINEで長い質問を送ると、お相手に負担を感じさせてしまい、せっかくの信頼関係（ラポール）にも響きかねません。</p>
+      <p>おすすめはZOOM、できればコーヒーをごちそうしながら直接お会いする<b>対面インタビュー</b>。時間をつくってお話を聞く誠意が伝わり、文章では出てこない本音の言葉がいただけます。ZOOMなら録画機能で、喫茶店なら了承をいただいてスマホの録音機能で記録を残せるので、書き起こしもラクになります。</p>
+      <p>顔出しNGの方や、お会いするのが難しい方には、文章でいただいても大丈夫。先にひと言お伺いを立ててから、5つの質問をお送りしましょう。</p>
     </div>
     <div class="step">
       <h3>声をいただく4つのステップ</h3>
@@ -310,6 +311,9 @@ footer{padding-block:40px 8px;color:var(--muted);font-size:13px;text-align:cente
       <p class="lead">お誘いの一言（例）</p>
       <div class="copybox" id="msgVoice"></div>
       <div class="btns"><button class="btn" type="button" data-copy="msgVoice">お誘いをコピー</button><span class="done" hidden></span></div>
+      <p class="lead">文章でお願いするときのひと言（例）</p>
+      <div class="copybox" id="msgText"></div>
+      <div class="btns"><button class="btn" type="button" data-copy="msgText">ひと言をコピー</button><span class="done" hidden></span></div>
     </div>
     <div class="step">
       <h3>変化の声をもらう5つの質問</h3>
@@ -463,6 +467,8 @@ ${baPairs()}
 
   function msgVoice(){const n=v('custName')||'◯◯';return `${n}さん、先日はありがとうございました！その後のお話をぜひ聞かせてください。今度お茶でも（ZOOMでも）いかがですか？＾＾`;}
 
+  function msgText(){const n=v('custName')||'◯◯';return `${n}さん、先日はありがとうございました！もしよろしければ、その後の変化をお聞かせいただけませんか？5つだけ質問をお送りしてもよいですか？＾＾`;}
+
   function msgPermit(){const n=v('custName')||'◯◯';return `${n}さん、先日はありがとうございました！お話をまとめてみました。言い回しなど、違うところがあれば教えてくださいね。
 
 ホームページやLINEでご紹介してもよろしければ、お名前（本名・仮名）とお写真（顔写真・イメージ写真・なし）のご希望も教えていただけたら嬉しいです＾＾`;}
@@ -491,6 +497,7 @@ ${kimoAnswers()}`;}
     $('promptKimo').textContent=promptKimo();
     $('msgVoice').textContent=msgVoice();
     $('msgPermit').textContent=msgPermit();
+    $('msgText').textContent=msgText();
     $('summary').textContent=summary();
     renderPreview();
   }
