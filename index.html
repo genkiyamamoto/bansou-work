@@ -293,19 +293,41 @@ footer{padding-block:40px 8px;color:var(--muted);font-size:13px;text-align:cente
       <h2>お客様の声を集める</h2>
       <p>「当たっていましたか？」と聞くと、返ってくるのはその場の声です。でも「セッションの後、何か変化はありましたか？」と聞くと、変化の声が返ってきます。この変化の声が、伴走サポートで起きることの何よりの予告編になります。</p>
     </div>
-    <div class="step">
-      <h3>LINEでお願いするときの文例</h3>
-      <p class="lead">セッションから少し時間がたって、変化が出てきた頃にお送りするのがおすすめです。お名前を入れると、文例に反映されます。</p>
-      <div class="q"><label for="custName">お客様のお名前</label><input type="text" id="custName" placeholder="例）さくら"></div>
-      <div class="copybox" id="msgVoice"></div>
-      <div class="btns"><button class="btn" type="button" data-copy="msgVoice">文例をコピー</button><span class="done" hidden></span></div>
-      <p class="lead">「ご感想を書いてください」とだけお願いすると、文章を書き慣れていない方は「楽しかったです」で終わってしまいます。最低限、②③④があれば、お困りごとから変化まで伝わる声の形が整います。</p>
+    <div class="warn">
+      <h3>声は「文面」ではなく「対面」でいただく</h3>
+      <p>お客様の声は、こちらからお願いするものです。LINEで長い質問を送ってしまうと、非常識なお願いに映ってしまい、せっかくの信頼関係（ラポール）が切れてしまうこともあります。</p>
+      <p>おすすめは、お茶をごちそうしながらの<b>対面インタビュー</b>。5つの質問を会話の中で直接うかがい、お相手の言葉をそのままメモして、後日書き起こしたものを確認していただきます。</p>
     </div>
     <div class="step">
-      <h3>掲載のお願い</h3>
-      <p class="lead">お名前やお写真を載せてよいかは、先にきちんと確認しておきましょう。顔写真と本名がある声ほど信頼されますが、ご不安な方には「仮名でも大丈夫ですよ」とお伝えすると、安心して協力していただけます。</p>
+      <h3>声をいただく4つのステップ</h3>
+      <ol class="howto">
+        <li><b>短くお誘いする</b>　LINEで送るのは、お茶のお誘いの一言だけ</li>
+        <li><b>会話の中で、5つの質問をうかがう</b>　質問票は渡さず、雑談のように</li>
+        <li><b>お相手の言葉をそのままメモする</b>　録音するなら先にひと言了承を</li>
+        <li><b>書き起こして、確認していただく</b>　掲載のお願いもこのときに</li>
+      </ol>
+      <div class="q"><label for="custName">お客様のお名前</label><input type="text" id="custName" placeholder="例）さくら"></div>
+      <p class="lead">お誘いの一言（例）</p>
+      <div class="copybox" id="msgVoice"></div>
+      <div class="btns"><button class="btn" type="button" data-copy="msgVoice">お誘いをコピー</button><span class="done" hidden></span></div>
+    </div>
+    <div class="step">
+      <h3>変化の声をもらう5つの質問</h3>
+      <p class="lead">会話の中で、この順番でうかがうと、お困りごとから変化までが1つの物語になります。</p>
+      <ol class="howto">
+        <li>何を見て知ってくださいましたか？</li>
+        <li>どんなことでお困りでしたか？</li>
+        <li>受けてみていかがでしたか？どんな変化がありましたか？</li>
+        <li>もし受けていなかったら、どうなっていたと思いますか？</li>
+        <li>どんな方におすすめしたいですか？</li>
+      </ol>
+      <p class="lead">最低限、②③④があれば、お困りごとから変化まで伝わる声の形が整います。話が広がったら「それって、どんな感じでしたか？」ともう一歩だけ深くうかがってみてください。</p>
+    </div>
+    <div class="step">
+      <h3>書き起こしの確認と、掲載のお願い</h3>
+      <p class="lead">まとめた文章は、必ずご本人に見ていただきます。顔写真と本名がある声ほど信頼されますが、ご不安な方には「仮名でも大丈夫ですよ」とお伝えすると、安心して協力していただけます。</p>
       <div class="copybox" id="msgPermit"></div>
-      <div class="btns"><button class="btn" type="button" data-copy="msgPermit">掲載のお願いをコピー</button><span class="done" hidden></span></div>
+      <div class="btns"><button class="btn" type="button" data-copy="msgPermit">確認のお願いをコピー</button><span class="done" hidden></span></div>
       <p class="lead">いただいた声のうち、②のお困りごとはビフォーに、③の変化はアフターに、そのまま使えます。</p>
     </div>
   </section>
@@ -439,26 +461,11 @@ ${baPairs()}
 ・雰囲気は【私の回答】のトンマナに合わせる
 ・日本語の文字は正確に、誤字がないように`;}
 
-  function msgVoice(){const n=v('custName')||'◯◯';return `${n}さん、先日はセッションを受けてくださって、ありがとうございました！
-その後、いかがお過ごしですか？
+  function msgVoice(){const n=v('custName')||'◯◯';return `${n}さん、先日はありがとうございました！その後のお話をぜひ聞かせてください。今度お茶でもいかがですか？＾＾`;}
 
-よろしければ、これからのサポートづくりの参考に、ご感想をお聞かせいただけたら嬉しいです。
-下の5つの質問に、思いつく範囲で答えていただけますか？全部でなくても大丈夫です＾＾
+  function msgPermit(){const n=v('custName')||'◯◯';return `${n}さん、先日はありがとうございました！お話をまとめてみました。言い回しなど、違うところがあれば教えてくださいね。
 
-① 何を見て知ってくださいましたか？
-② どんなことでお困りでしたか？
-③ 受けてみていかがでしたか？どんな変化がありましたか？
-④ もし受けていなかったら、どうなっていたと思いますか？
-⑤ どんな方におすすめしたいですか？`;}
-
-  const msgPermit=`いただいたご感想を、ホームページやLINEでご紹介してもよろしいでしょうか？
-当てはまるものを教えてください。
-
-・掲載　→　OK ／ 掲載しないでほしい
-・お名前　→　本名でOK ／ イニシャル・仮名でお願いしたい
-・お写真　→　顔写真OK ／ イメージ写真でお願いしたい ／ 写真なしでお願いしたい
-
-仮名でも大丈夫ですので、ご安心くださいね。`;
+ホームページやLINEでご紹介してもよろしければ、お名前（本名・仮名）とお写真（顔写真・イメージ写真・なし）のご希望も教えていただけたら嬉しいです＾＾`;}
 
   function summary(){return `【伴走サポート 3つの設計ワーク　入力内容】
 
@@ -483,7 +490,7 @@ ${kimoAnswers()}`;}
     $('promptBA').textContent=promptBA();
     $('promptKimo').textContent=promptKimo();
     $('msgVoice').textContent=msgVoice();
-    $('msgPermit').textContent=msgPermit;
+    $('msgPermit').textContent=msgPermit();
     $('summary').textContent=summary();
     renderPreview();
   }
